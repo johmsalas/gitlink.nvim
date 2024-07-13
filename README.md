@@ -1,0 +1,1 @@
+# gitlink.nvim
