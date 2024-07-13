@@ -77,4 +77,26 @@ function M.yank_commit_permanent_link()
   local link = M.get_commit_link()
   M.copy_to_clipboard(link)
 end
+
+function M.yank_markdown_reference()
+  local link = M.get_commit_link()
+
+  local start_line = vim.fn.line("v")
+  local end_line = vim.fn.line(".")
+  local selected_text = vim.fn.getline(start_line, end_line)
+
+  -- Ensure selected_text is a table for table.concat
+  if type(selected_text) == "string" then
+    selected_text = { selected_text }
+  end
+
+  local joined_text = table.concat(selected_text, "\n")
+
+  local file_type = vim.bo.filetype
+  local file_path = vim.fn.expand("%")
+
+  local markdown = string.format("```%s\n%s\n```\n[View code: %s](%s)", file_type, joined_text, file_path, link)
+
+  M.copy_to_clipboard(markdown)
+end
 return M
