@@ -7,6 +7,19 @@ local GIT_FILE_COMMIT_CMD = "git rev-list -1 HEAD -- %s"
 local GIT_ROOT_CMD = "git rev-parse --show-toplevel"
 local URL_ENCODE_CMD = "curl -s --data-urlencode %s"
 
+local DEFAULT_OPTIONS = {
+  reference_format = {
+    default_formatter = "default",
+    formatters = {
+      default = function(args)
+        return string.format("[%s](%s)\n```%s\n%s\n```", args.filepath, args.link, args.filetype, args.selected_text)
+      end,
+    },
+  },
+}
+
+M.config = DEFAULT_OPTIONS
+
 local function cmd_run(cmd)
   return vim.fn.system(cmd):gsub("\n", "")
 end
@@ -112,7 +125,6 @@ local function get_git_link(ref, startline, endline)
 end
 
 function M.get_commit_link(lines)
-  vim.print(lines)
   local ref = cmd_run(string.format(GIT_FILE_COMMIT_CMD, vim.fn.shellescape(vim.fn.expand("%"))))
   return get_git_link(ref, lines[1], lines[2])
 end
@@ -154,8 +166,27 @@ function M.yank_markdown_reference(lines)
   local file_type = vim.bo.filetype
   local file_path = vim.fn.expand("%")
 
-  local markdown = string.format("[%s](%s)\n```%s\n%s\n```", file_path, link, file_type, joined_text)
+  local formatters = M.config.reference_format.formatters
+  local default_formatter = M.config.reference_format.default_formatter
 
-  M.copy_to_clipboard(markdown)
+  if formatters[default_formatter] == nil then
+    error("Formatter " .. default_formatter .. " not found")
+  end
+
+  local result = M.config.reference_format.formatters[default_formatter]({
+    filepath = file_path,
+    link = link,
+    filetype = file_type,
+    selected_text = joined_text,
+  })
+
+  -- local markdown = string.format("[%s](%s)\n```%s\n%s\n```", file_path, link, file_type, joined_text)
+
+  M.copy_to_clipboard(result)
 end
+
+function M.setup(opts)
+  M.config = vim.tbl_deep_extend("force", DEFAULT_OPTIONS, opts or {})
+end
+
 return M
