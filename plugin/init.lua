@@ -18,7 +18,7 @@ vim.api.nvim_create_user_command("YankGitCommitPermanentLink", function(args)
   gitlink.yank_commit_permanent_link(sort_pair({ line1, line2 }))
 end, { range = true })
 
-vim.api.nvim_create_user_command("YankMarkdownGitReference", function(args)
+vim.api.nvim_create_user_command("YankFormattedGitReference", function(args)
   local line1 = args.line1
   local line2 = args.line2
   gitlink.yank_markdown_reference(sort_pair({ line1, line2 }))
