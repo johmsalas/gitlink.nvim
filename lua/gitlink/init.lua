@@ -149,7 +149,10 @@ function M.yank_commit_permanent_link(lines)
   M.copy_to_clipboard(link)
 end
 
-function M.yank_markdown_reference(lines)
+function M.yank_markdown_reference(lines, formatter)
+  formatter = formatter
+    or M.config.reference_format.default_formatter
+    or DEFAULT_OPTIONS.reference_format.default_formatter
   local link = M.get_commit_link(lines)
 
   local start_line = lines[1]
@@ -167,20 +170,17 @@ function M.yank_markdown_reference(lines)
   local file_path = vim.fn.expand("%")
 
   local formatters = M.config.reference_format.formatters
-  local default_formatter = M.config.reference_format.default_formatter
 
-  if formatters[default_formatter] == nil then
-    error("Formatter " .. default_formatter .. " not found")
+  if formatters[formatter] == nil then
+    error("Formatter " .. formatter .. " not found")
   end
 
-  local result = M.config.reference_format.formatters[default_formatter]({
+  local result = M.config.reference_format.formatters[formatter]({
     filepath = file_path,
     link = link,
     filetype = file_type,
     selected_text = joined_text,
   })
-
-  -- local markdown = string.format("[%s](%s)\n```%s\n%s\n```", file_path, link, file_type, joined_text)
 
   M.copy_to_clipboard(result)
 end

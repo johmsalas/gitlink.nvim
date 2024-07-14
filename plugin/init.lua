@@ -21,5 +21,12 @@ end, { range = true })
 vim.api.nvim_create_user_command("YankFormattedGitReference", function(args)
   local line1 = args.line1
   local line2 = args.line2
-  gitlink.yank_markdown_reference(sort_pair({ line1, line2 }))
-end, { range = true })
+  local formatter = args.args
+  gitlink.yank_markdown_reference(sort_pair({ line1, line2 }), formatter)
+end, { range = true, nargs = "?", complete = "customlist,MyCustomCompleteFunc" })
+
+-- vim.api.nvim_create_user_command("YankFormattedGitReference", function(args)
+--   local line1 = args.line1
+--   local line2 = args.line2
+--   gitlink.yank_markdown_reference(sort_pair({ line1, line2 }))
+-- end, { range = true })
